@@ -1,0 +1,3 @@
+FLASK_APP=dashapp
+FLASK_ENV=development
+SECRET_KEY=secret_key_change_as_you_wish_make_it_long_123

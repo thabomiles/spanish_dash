@@ -11,14 +11,16 @@ Base = declarative_base()
 from app.extensions import db
 from app.extensions import login
 
-association_table = Table('association', Base.metadata,
-    Column('user_id', Integer, ForeignKey('user.id')),
-    Column('vocab_id', Integer, ForeignKey('vocab.id'))
-)
 
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
+
+association_table = Table('association', db.Model.metadata,
+    Column('user_id', Integer, ForeignKey('user.id')),
+    Column('vocab_id', Integer, ForeignKey('vocab.id'))
+    )
 
 
 class User(UserMixin, db.Model):
@@ -26,6 +28,9 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    connection = db.relationship('Vocab', secondary=association_table, 
+        backref=db.backref('following_users', lazy='dynamic'))
+
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -36,8 +41,10 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
+
 class Vocab(db.Model):
     __tablename__ = 'vocab'
     id = Column(Integer, primary_key=True)
-    parent_id = Column(Integer, ForeignKey('user.id'))
     words_es = db.Column(db.String(128))
+
+

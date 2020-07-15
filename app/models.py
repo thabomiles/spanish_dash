@@ -5,6 +5,7 @@ from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref
+import pandas as pd
 
 Base = declarative_base()
 
@@ -19,7 +20,7 @@ def load_user(id):
 
 association_table = Table('association', db.Model.metadata,
     Column('user_id', Integer, ForeignKey('user.id')),
-    Column('vocab_id', Integer, ForeignKey('vocab.id'))
+    Column('vocab_id', Integer, ForeignKey('nocab.id'))
     )
 
 
@@ -28,7 +29,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    connection = db.relationship('Vocab', secondary=association_table, 
+    connection = db.relationship('Nocab', secondary=association_table, 
         backref=db.backref('following_users', lazy='dynamic'))
 
 
@@ -42,9 +43,12 @@ class User(UserMixin, db.Model):
         return '<User {}>'.format(self.username)
 
 
-class Vocab(db.Model):
-    __tablename__ = 'vocab'
+class Nocab(db.Model):
+    __tablename__ = 'nocab'
     id = Column(Integer, primary_key=True)
     words_es = db.Column(db.String(128))
+    form = db.Column(db.Integer)
+    def_es = db.Column(db.String(1000))
+    frequency = db.Column(db.Integer)
 
 
